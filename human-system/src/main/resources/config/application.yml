@@ -1,0 +1,15 @@
+server:
+  port: 8000
+
+spring:
+  freemarker:
+    check-template-location: false
+  config:
+    activate:
+      on-profile: dev
+  jackson:
+    time-zone: GMT+8
+  data:
+    redis:
+      repositories:
+        enabled: false
