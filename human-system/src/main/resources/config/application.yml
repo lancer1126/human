@@ -13,3 +13,6 @@ spring:
     redis:
       repositories:
         enabled: false
+
+rsa:
+  private_key: 123
