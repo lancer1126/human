@@ -1,5 +1,6 @@
 package com.lance.modules.security.service;
 
+import cn.hutool.core.util.PageUtil;
 import com.lance.modules.security.config.bean.SecurityProperties;
 import com.lance.modules.security.service.dto.JwtUserDto;
 import com.lance.modules.security.service.dto.OnlineUserDto;
@@ -11,7 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author lancer1126
@@ -44,5 +48,73 @@ public class OnlineUserService {
             log.error(e.getMessage());
         }
         redisUtils.set(properties.getOnlineKey() + token, onlineUserDto, properties.getTokenValidityInSeconds()/1000);
+    }
+
+    /**
+     * 不分页查询全部数据
+     * @param filter    查询条件
+     * @return          /
+     */
+    public List<OnlineUserDto> getAll(String filter) {
+        List<String> keys = redisUtils.scan(properties.getOnlineKey() + "*");
+        Collections.reverse(keys);
+
+        List<OnlineUserDto> onlineUserDtos = new ArrayList<>();
+        for (String key : keys) {
+            OnlineUserDto onlineUserDto = (OnlineUserDto)redisUtils.get(key);
+            if (StringUtils.isNotBlank(filter)) {
+                if (onlineUserDto.toString().contains(filter)) {
+                    onlineUserDtos.add(onlineUserDto);
+                }
+            } else {
+                onlineUserDtos.add(onlineUserDto);
+            }
+        }
+        onlineUserDtos.sort((o1, o2) -> o2.getLoginTime().compareTo(o1.getLoginTime()));
+        return onlineUserDtos;
+    }
+
+    /**
+     * 踢出用户
+     * @param key /
+     */
+    public void kickOut(String key){
+        key = properties.getOnlineKey() + key;
+        redisUtils.del(key);
+    }
+
+    /**
+     * 检测该账号是否已经登录，若已登录则将之踢下线
+     * @param userName      userName
+     * @param ignoreToken   现登录的token，由这个token进行登录
+     */
+    public void checkLoginOnUser(String userName, String ignoreToken) {
+        List<OnlineUserDto> onlineUserDtos = getAll(userName);
+        if (onlineUserDtos == null || onlineUserDtos.isEmpty()) {
+            return;
+        }
+
+        for (OnlineUserDto onlineUserDto : onlineUserDtos) {
+            if (userName.equals(onlineUserDto.getUserName())) {
+                try {
+                    String token = EncryptUtils.desEncrypt(onlineUserDto.getKey());
+                    if ((StringUtils.isNotBlank(ignoreToken) && !ignoreToken.equals(token))
+                            || StringUtils.isBlank(ignoreToken)) {
+                        this.kickOut(token);
+                    }
+                } catch (Exception e) {
+                    log.error("checkUser is null", e);
+                }
+            }
+        }
+    }
+
+    /**
+     * 退出登录
+     * @param token /
+     */
+    public void logout(String token) {
+        String key = properties.getOnlineKey() + token;
+        redisUtils.del(key);
     }
 }

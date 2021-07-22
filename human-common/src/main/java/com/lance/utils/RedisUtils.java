@@ -2,11 +2,15 @@ package com.lance.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisConnectionUtils;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -90,5 +94,29 @@ public class RedisUtils {
             log.error(e.getMessage(), e);
             return false;
         }
+    }
+
+    /**
+     * 查找匹配的key
+     * @param pattern
+     * @return
+     */
+    public List<String> scan(String pattern) {
+        ScanOptions options = ScanOptions.scanOptions().match(pattern).build();
+        RedisConnectionFactory factory = redisTemplate.getConnectionFactory();
+        RedisConnection rc = Objects.requireNonNull(factory).getConnection();
+        Cursor<byte[]> cursor = rc.scan(options);
+
+        List<String> result = new ArrayList<>();
+        while (cursor.hasNext()) {
+            result.add(new String(cursor.next()));
+        }
+
+        try {
+            RedisConnectionUtils.releaseConnection(rc, factory);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return result;
     }
 }

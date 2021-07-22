@@ -1,5 +1,6 @@
 package com.lance.modules.security.rest;
 
+import com.lance.annotation.rest.AnonymousDeleteMapping;
 import com.lance.annotation.rest.AnonymousPostMapping;
 import com.lance.config.RsaProperties;
 import com.lance.exception.BadRequestException;
@@ -11,17 +12,20 @@ import com.lance.modules.security.service.dto.AuthUserDto;
 import com.lance.modules.security.service.dto.JwtUserDto;
 import com.lance.utils.RedisUtils;
 import com.lance.utils.RsaUtils;
+import com.lance.utils.SecurityUtils;
 import com.lance.utils.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -84,8 +88,21 @@ public class AuthorizationController {
         }};
 
         if (loginProperties.isSingleLogin()) {
-            // todo 踢掉之前登录的token
+            onlineUserService.checkLoginOnUser(authUser.getUsername(), token);
         }
         return ResponseEntity.ok(authInfo);
+    }
+
+    @ApiOperation("获取用户信息")
+    @GetMapping("/info")
+    public ResponseEntity<Object> getUserInfo() {
+        return ResponseEntity.ok(SecurityUtils.getCurrentUser());
+    }
+
+    @ApiOperation("退出登录")
+    @AnonymousDeleteMapping(value = "/logout")
+    public ResponseEntity<Object> logout(HttpServletRequest request) {
+        onlineUserService.logout(tokenProvider.getToken(request));
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
