@@ -117,4 +117,12 @@ public class OnlineUserService {
         String key = properties.getOnlineKey() + token;
         redisUtils.del(key);
     }
+
+    /**
+     * 查询单个用户
+     * @param key /
+     */
+    public OnlineUserDto getOne(String key) {
+        return (OnlineUserDto) redisUtils.get(key);
+    }
 }

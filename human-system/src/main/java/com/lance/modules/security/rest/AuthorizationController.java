@@ -1,9 +1,12 @@
 package com.lance.modules.security.rest;
 
+import cn.hutool.core.util.IdUtil;
 import com.lance.annotation.rest.AnonymousDeleteMapping;
+import com.lance.annotation.rest.AnonymousGetMapping;
 import com.lance.annotation.rest.AnonymousPostMapping;
 import com.lance.config.RsaProperties;
 import com.lance.exception.BadRequestException;
+import com.lance.modules.security.config.bean.LoginCodeEnum;
 import com.lance.modules.security.config.bean.LoginProperties;
 import com.lance.modules.security.config.bean.SecurityProperties;
 import com.lance.modules.security.security.TokenProvider;
@@ -14,6 +17,7 @@ import com.lance.utils.RedisUtils;
 import com.lance.utils.RsaUtils;
 import com.lance.utils.SecurityUtils;
 import com.lance.utils.StringUtils;
+import com.wf.captcha.base.Captcha;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +38,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 授权，根据token获取用户信息
@@ -97,6 +102,27 @@ public class AuthorizationController {
     @GetMapping("/info")
     public ResponseEntity<Object> getUserInfo() {
         return ResponseEntity.ok(SecurityUtils.getCurrentUser());
+    }
+
+    @ApiOperation("获取验证码")
+    @AnonymousGetMapping("/code")
+    public ResponseEntity<Object> getCode() {
+        Captcha captcha = loginProperties.getCaptcha();
+        String uuid = properties.getCodeKey() + IdUtil.simpleUUID();
+
+        //当验证码类型为 arithmetic时且长度 >= 2 时，captcha.text()的结果有几率为浮点型
+        String captchaValue = captcha.text();
+        if (captcha.getCharType() - 1 == LoginCodeEnum.arithmetic.ordinal() && captchaValue.contains(".")) {
+            captchaValue = captchaValue.split("\\.")[0];
+        }
+
+        // 存入redis
+        redisUtils.set(uuid, captchaValue, loginProperties.getLoginCode().getExpiration(), TimeUnit.MINUTES);
+        Map<String, Object> imgResult = new HashMap<>(2){{
+           put("img", captcha.toBase64());
+           put("uuid", uuid);
+        }};
+        return ResponseEntity.ok(imgResult);
     }
 
     @ApiOperation("退出登录")

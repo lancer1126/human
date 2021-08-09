@@ -1,12 +1,12 @@
 package com.lance.modules.system.service.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
 @Data
-@AllArgsConstructor
+@NoArgsConstructor
 public class JobSmallDto implements Serializable {
 
     private  long id;
