@@ -20,10 +20,13 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @SuppressWarnings({"unchecked", "all"})
-@RequiredArgsConstructor
 public class RedisUtils {
     private static final Logger log = LoggerFactory.getLogger(RedisUtils.class);
     private RedisTemplate<Object, Object> redisTemplate;
+
+    public RedisUtils(RedisTemplate<Object, Object> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
 
     /**
      * 删除缓存
@@ -170,6 +173,7 @@ public class RedisUtils {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return false;
+
         }
         return true;
     }

@@ -5,9 +5,9 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
 import com.lance.modules.security.config.bean.SecurityProperties;
 import com.lance.utils.RedisUtils;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.interfaces.PBEKey;
 import javax.servlet.http.HttpServletRequest;
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -40,8 +41,11 @@ public class TokenProvider implements InitializingBean {
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
-
+    public void afterPropertiesSet() {
+        byte[] keyBytes = Decoders.BASE64.decode(properties.getBase64Secret());
+        Key key = Keys.hmacShaKeyFor(keyBytes);
+        jwtParser = Jwts.parserBuilder().setSigningKey(key).build();
+        jwtBuilder = Jwts.builder().signWith(key, SignatureAlgorithm.HS512);
     }
 
     public String createToken(Authentication authentication) {

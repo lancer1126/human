@@ -126,7 +126,7 @@ public class AuthorizationController {
     }
 
     @ApiOperation("退出登录")
-    @AnonymousDeleteMapping(value = "/logout")
+    @AnonymousDeleteMapping("/logout")
     public ResponseEntity<Object> logout(HttpServletRequest request) {
         onlineUserService.logout(tokenProvider.getToken(request));
         return new ResponseEntity<>(HttpStatus.OK);

@@ -42,8 +42,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             jwtUserDto = userDtoCache.get(username);
             // 检查dataScope是否修改
             List<Long> dataScopes = jwtUserDto.getDataScopes();
-            dataScopes.clear();
-            dataScopes.addAll(dataService.getDeptIds(jwtUserDto.getUser()));
+            if (dataScopes != null) {
+                dataScopes.clear();
+                dataScopes.addAll(dataService.getDeptIds(jwtUserDto.getUser()));
+            }
             searchDb = false;
         }
         if (searchDb) {
@@ -62,8 +64,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 }
                 jwtUserDto = new JwtUserDto(
                         user,
-                        dataService.getDeptIds(user), null
-//                        roleService.mapToGrantedAuthorities(user)
+                        dataService.getDeptIds(user),
+                        roleService.mapToGrantedAuthorities(user)
                 );
                 userDtoCache.put(username, jwtUserDto);
             }

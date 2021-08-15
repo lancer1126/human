@@ -8,21 +8,19 @@ import com.lance.utils.EncryptUtils;
 import com.lance.utils.RedisUtils;
 import com.lance.utils.StringUtils;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author lancer1126
  */
 @Slf4j
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class OnlineUserService {
 
     private final RedisUtils redisUtils;
@@ -45,7 +43,7 @@ public class OnlineUserService {
             onlineUserDto = new OnlineUserDto(jwtUserDto.getUsername(), jwtUserDto.getUser().getNickName(),
                     dept, browser, ip, address, EncryptUtils.desEncrypt(token), new Date());
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
         }
         redisUtils.set(properties.getOnlineKey() + token, onlineUserDto, properties.getTokenValidityInSeconds()/1000);
     }

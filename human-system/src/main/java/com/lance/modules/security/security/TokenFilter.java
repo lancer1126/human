@@ -1,7 +1,5 @@
 package com.lance.modules.security.security;
 
-import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.lance.modules.security.config.bean.SecurityProperties;
 import com.lance.modules.security.service.OnlineUserService;
@@ -13,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserCache;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -23,9 +20,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.Date;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
 public class TokenFilter extends GenericFilterBean {
@@ -52,7 +47,7 @@ public class TokenFilter extends GenericFilterBean {
                 isNeedCleanUserCache = true;
             } finally {
                 if (isNeedCleanUserCache || Objects.isNull(onlineUserDto)) {
-//                    userCacheClean.cleanUserCache(String.valueOf(tokenProvider.getClaim(token)));
+                    userCacheClean.cleanUserCache(String.valueOf(tokenProvider.getClaims(token).get(TokenProvider.AUTHORITIES_KEY)));
                 }
             }
 

@@ -9,6 +9,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserCacheClean {
 
+    /**
+     * 清理特定用户缓存信息
+     * 用户信息变更时
+     */
     public void cleanUserCache(String username) {
         if (StringUtils.isNotEmpty(username)) {
             UserDetailsServiceImpl.userDtoCache.remove(username);

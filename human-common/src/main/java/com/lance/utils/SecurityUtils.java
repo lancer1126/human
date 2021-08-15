@@ -1,5 +1,6 @@
 package com.lance.utils;
 
+import cn.hutool.json.JSONObject;
 import com.lance.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -34,5 +35,10 @@ public class SecurityUtils {
             return userDetails.getUsername();
         }
         throw new BadRequestException(HttpStatus.UNAUTHORIZED, "无法找到登录信息");
+    }
+
+    public static Long getCurrentUserId() {
+        UserDetails currentUser = getCurrentUser();
+        return new JSONObject(new JSONObject(currentUser).get("user")).get("id", Long.class);
     }
 }
