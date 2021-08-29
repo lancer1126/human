@@ -18,6 +18,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")  // 自动化填充参数
 public class AppRun {
 
+    static {
+        System.setProperty("druid.mysql.usePingMethod", "false");
+    }
+
     public static void main(String[] args) {
         SpringApplication.run(AppRun.class, args);
     }
