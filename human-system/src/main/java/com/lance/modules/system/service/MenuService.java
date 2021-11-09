@@ -5,6 +5,7 @@ import com.lance.modules.system.service.dto.MenuDto;
 import java.util.List;
 
 public interface MenuService {
+
     List<MenuDto> findByUser(Long currentUserId);
 
     /**

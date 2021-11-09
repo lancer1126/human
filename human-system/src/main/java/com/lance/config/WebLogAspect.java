@@ -1,10 +1,10 @@
 package com.lance.config;
 
-import com.alibaba.fastjson.JSON;
-import org.aopalliance.intercept.Joinpoint;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.*;
+import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -18,10 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 public class WebLogAspect {
     private final static Logger LOGGER = LoggerFactory.getLogger(WebLogAspect.class);
 
-    private final static String execution = "execution(public * com.lance.modules.security.rest..*(..)) " +
-            "|| execution(public * com.lance.modules.system.rest..*(..))";
-
-    @Pointcut(execution)
+    @Pointcut("execution(public * com.lance.modules.*.rest..*(..))")
     public void webLog() {}
 
     @Before("webLog()")
@@ -35,12 +32,13 @@ public class WebLogAspect {
         LOGGER.info("Class Method    : {}.{}", joinPoint.getSignature().getDeclaringTypeName(), joinPoint.getSignature().getName());
         LOGGER.info("IP              : {}", request.getRemoteAddr());
         LOGGER.info("Request Args    : {}", joinPoint.getArgs());
-    }
-
-    @After("webLog()")
-    public void doAfter() {
         LOGGER.info("---------------------------------------- End -----------------------------------------");
     }
+
+//    @After("webLog()")
+//    public void doAfter() {
+//        LOGGER.info("---------------------------------------- End -----------------------------------------");
+//    }
 
 //    @Around("webLog()")
 //    public Object doAround(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
