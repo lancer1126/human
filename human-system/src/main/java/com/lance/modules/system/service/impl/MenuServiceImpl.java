@@ -9,14 +9,18 @@ import com.lance.modules.system.repository.MenuRepository;
 import com.lance.modules.system.service.MenuService;
 import com.lance.modules.system.service.RoleService;
 import com.lance.modules.system.service.dto.MenuDto;
+import com.lance.modules.system.service.dto.MenuQueryCriteria;
 import com.lance.modules.system.service.dto.RoleSmallDto;
 import com.lance.modules.system.service.mapstruct.MenuMapper;
+import com.lance.utils.QueryHelp;
 import com.lance.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -113,5 +117,39 @@ public class MenuServiceImpl implements MenuService {
                 }
         );
         return list;
+    }
+
+    @Override
+    public List<MenuDto> getMenus(Long pid) {
+        List<Menu> menus;
+        if(pid != null && !pid.equals(0L)){
+            menus = menuRepository.findByPid(pid);
+        } else {
+            menus = menuRepository.findByPidIsNull();
+        }
+        return menuMapper.toDto(menus);
+    }
+
+    @Override
+    public List<MenuDto> queryAll(MenuQueryCriteria criteria, Boolean isQuery) throws Exception {
+        Sort sort = Sort.by(Sort.Direction.ASC, "menuSort");
+        if(Boolean.TRUE.equals(isQuery)){
+            criteria.setPidIsNull(true);
+            List<Field> fields = QueryHelp.getAllFields(criteria.getClass(), new ArrayList<>());
+            for (Field field : fields) {
+                //设置对象的访问权限，保证对private的属性的访问
+                field.setAccessible(true);
+                Object val = field.get(criteria);
+                if("pidIsNull".equals(field.getName())){
+                    continue;
+                }
+                if (ObjectUtil.isNotNull(val)) {
+                    criteria.setPidIsNull(null);
+                    break;
+                }
+            }
+        }
+        return menuMapper.toDto(menuRepository.findAll((root, criteriaQuery, criteriaBuilder) ->
+                QueryHelp.getPredicate(root,criteria,criteriaBuilder),sort));
     }
 }

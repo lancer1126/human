@@ -5,6 +5,7 @@ import com.lance.modules.system.service.dto.DictQueryCriteria;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,5 +26,12 @@ public class DictController {
     @PreAuthorize("@el.check('dict:list')")
     public ResponseEntity<Object> queryAll(){
         return new ResponseEntity<>(dictService.queryAll(new DictQueryCriteria()), HttpStatus.OK);
+    }
+
+    @ApiOperation("查询字典")
+    @GetMapping
+    @PreAuthorize("@el.check('dict:list')")
+    public ResponseEntity<Object> query(DictQueryCriteria resources, Pageable pageable){
+        return new ResponseEntity<>(dictService.queryAll(resources,pageable),HttpStatus.OK);
     }
 }

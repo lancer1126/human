@@ -1,5 +1,6 @@
 package com.lance.modules.system.service;
 
+import com.lance.modules.system.service.dto.RoleDto;
 import com.lance.modules.system.service.dto.RoleSmallDto;
 import com.lance.modules.system.service.dto.UserDto;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,4 +17,11 @@ public interface RoleService {
     List<GrantedAuthority> mapToGrantedAuthorities(UserDto user);
 
     List<RoleSmallDto> findByUsersId(Long currentUserId);
+
+    /**
+     * 根据ID查询
+     * @param id /
+     * @return /
+     */
+    RoleDto findById(long id);
 }
