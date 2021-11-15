@@ -1,18 +1,20 @@
 package com.lance.modules.security.service;
 
-import cn.hutool.core.util.PageUtil;
 import com.lance.modules.security.config.bean.SecurityProperties;
 import com.lance.modules.security.service.dto.JwtUserDto;
 import com.lance.modules.security.service.dto.OnlineUserDto;
 import com.lance.utils.EncryptUtils;
+import com.lance.utils.PageUtil;
 import com.lance.utils.RedisUtils;
 import com.lance.utils.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.security.spec.NamedParameterSpec;
 import java.util.*;
 
 /**
@@ -70,6 +72,13 @@ public class OnlineUserService {
         }
         onlineUserDtos.sort((o1, o2) -> o2.getLoginTime().compareTo(o1.getLoginTime()));
         return onlineUserDtos;
+    }
+
+    public Map<String, Object> getAll(String filter, Pageable pageable) {
+        List<OnlineUserDto> onlineUsers = getAll(filter);
+        return PageUtil.toPage(
+                PageUtil.toPage(pageable.getPageNumber(), pageable.getPageSize(), onlineUsers), onlineUsers.size()
+        );
     }
 
     /**

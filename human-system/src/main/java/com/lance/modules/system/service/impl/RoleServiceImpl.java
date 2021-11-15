@@ -5,15 +5,20 @@ import com.lance.modules.system.domain.Role;
 import com.lance.modules.system.repository.RoleRepository;
 import com.lance.modules.system.service.RoleService;
 import com.lance.modules.system.service.dto.RoleDto;
+import com.lance.modules.system.service.dto.RoleQueryCriteria;
 import com.lance.modules.system.service.dto.RoleSmallDto;
 import com.lance.modules.system.service.dto.UserDto;
 import com.lance.modules.system.service.mapstruct.RoleMapper;
 import com.lance.modules.system.service.mapstruct.RoleSmallMapper;
+import com.lance.utils.PageUtil;
+import com.lance.utils.QueryHelp;
 import com.lance.utils.StringUtils;
 import com.lance.utils.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -64,5 +69,12 @@ public class RoleServiceImpl implements RoleService {
         Role role = roleRepository.findById(id).orElseGet(Role::new);
         ValidationUtil.isNull(role.getId(), "Role", "id", id);
         return roleMapper.toDto(role);
+    }
+
+    @Override
+    public Object queryAll(RoleQueryCriteria criteria, Pageable pageable) {
+        Page<Role> page = roleRepository.findAll((root, criteriaQuery, criteriaBuilder) ->
+                QueryHelp.getPredicate(root, criteria, criteriaBuilder), pageable);
+        return PageUtil.toPage(page.map(roleMapper::toDto));
     }
 }

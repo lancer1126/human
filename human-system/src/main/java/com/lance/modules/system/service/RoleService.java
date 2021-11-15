@@ -1,8 +1,10 @@
 package com.lance.modules.system.service;
 
 import com.lance.modules.system.service.dto.RoleDto;
+import com.lance.modules.system.service.dto.RoleQueryCriteria;
 import com.lance.modules.system.service.dto.RoleSmallDto;
 import com.lance.modules.system.service.dto.UserDto;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.List;
@@ -24,4 +26,12 @@ public interface RoleService {
      * @return /
      */
     RoleDto findById(long id);
+
+    /**
+     * 待条件分页查询
+     * @param criteria 条件
+     * @param pageable 分页参数
+     * @return /
+     */
+    Object queryAll(RoleQueryCriteria criteria, Pageable pageable);
 }

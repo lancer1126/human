@@ -3,11 +3,13 @@ package com.lance.modules.system.rest;
 import cn.hutool.core.lang.Dict;
 import com.lance.exception.BadRequestException;
 import com.lance.modules.system.service.RoleService;
+import com.lance.modules.system.service.dto.RoleQueryCriteria;
 import com.lance.modules.system.service.dto.RoleSmallDto;
 import com.lance.utils.SecurityUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,6 +29,13 @@ import java.util.stream.Collectors;
 public class RoleController {
 
     private final RoleService roleService;
+
+    @ApiOperation("查询角色")
+    @GetMapping
+    @PreAuthorize("@el.check('roles:list')")
+    public ResponseEntity<Object> query(RoleQueryCriteria criteria, Pageable pageable){
+        return new ResponseEntity<>(roleService.queryAll(criteria,pageable),HttpStatus.OK);
+    }
 
     @ApiOperation("获取单个role")
     @GetMapping(value = "/{id}")
