@@ -129,7 +129,7 @@ public class MonitorServiceImpl implements MonitorService {
         long totalCpu = user + nice + sys + idle + iowait + irq + softirq + steal;
         cpuInfo.put("used", df.format(100d * user / totalCpu + 100d * sys / totalCpu));
         cpuInfo.put("idle", df.format(100d * idle / totalCpu));
-        return null;
+        return cpuInfo;
     }
 
     private Map<String, Object> getSystemInfo(OperatingSystem os) {
